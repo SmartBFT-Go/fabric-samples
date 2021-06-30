@@ -289,15 +289,15 @@ function networkDown() {
   if [ "$MODE" != "restart" ]; then
     # Bring down the network, deleting the volumes
     #Delete any ledger backups
-    docker run -v $PWD:/tmp/first-network --rm smartbft/fabric-tools:latest rm -Rf /tmp/first-network/ledgers-backup
+    docker run --rm -v $PWD:/tmp/first-network --rm smartbft/fabric-tools:latest rm -Rf /tmp/first-network/ledgers-backup
     #Cleanup the chaincode containers
     clearContainers
     #Cleanup images
     removeUnwantedImages
     # remove orderer block and other channel configuration transactions and certs
-    docker run -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/crypto-config
-    docker run -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/channel-artifacts/*.block
-    docker run -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/channel-artifacts/*.tx
+    docker run --rm -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/crypto-config
+    docker run --rm -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/channel-artifacts/*.block
+    docker run --rm -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/channel-artifacts/*.tx
     # remove the docker-compose yaml file that was customized to the example
     rm -f docker-compose-e2e.yaml
   fi
@@ -375,11 +375,11 @@ function generateCerts() {
   cksum configtx-template.yaml
   cksum configtx.yaml
   i=1
-  docker run -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/crypto-config
-  docker run -v `pwd`:/mnt smartbft/fabric-tools cryptogen generate --config=/mnt/crypto-config.yaml --output /mnt/crypto-config
+  docker run --rm -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/crypto-config
+  docker run --rm -v `pwd`:/mnt smartbft/fabric-tools cryptogen generate --config=/mnt/crypto-config.yaml --output /mnt/crypto-config
   find crypto-config/ordererOrganizations/example.com/orderers -name "*_sk" | while read sk; do
     keystore=$(dirname $sk)
-    selectionPK=$(docker run -v `pwd`:/mnt smartbft/fabric-tools cs detect --userKey /mnt/$sk 2>&1 | grep -v "Generated public key")
+    selectionPK=$(docker run --rm -v `pwd`:/mnt smartbft/fabric-tools cs detect --userKey /mnt/$sk 2>&1 | grep -v "Generated public key")
     sed -i "s|%SELECTION_PK${i}%|$selectionPK|" configtx.yaml
     (( i += 1 ))
   done
@@ -468,7 +468,7 @@ function generateChannelArtifacts() {
     exit 1
   fi
 
-#docker run -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/channel-artifacts
+#docker run --rm -v `pwd`:/mnt smartbft/fabric-tools rm -rf /mnt/channel-artifacts
 
   echo
   echo "#################################################################"
